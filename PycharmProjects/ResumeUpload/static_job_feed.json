@@ -1,0 +1,142 @@
+[
+  {
+    "id": "google-data-001",
+    "title": "Data Analyst",
+    "company": "Google",
+    "location": "Remote",
+    "description": "We\u2019re looking for a data analyst with experience in SQL, Python, and Tableau.",
+    "skills": [
+      "SQL",
+      "Python",
+      "Tableau"
+    ],
+    "url": "https://careers.google.com/jobs/results/001",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "meta-data-002",
+    "title": "Data Engineer",
+    "company": "Meta",
+    "location": "New York, NY",
+    "description": "Meta is hiring a data engineer with Spark, Python, and BigQuery experience.",
+    "skills": [
+      "Spark",
+      "Python",
+      "BigQuery"
+    ],
+    "url": "https://www.metacareers.com/jobs/002",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "amazon-data-003",
+    "title": "Business Intelligence Engineer",
+    "company": "Amazon",
+    "location": "Seattle, WA",
+    "description": "Build dashboards and data pipelines using SQL, Redshift, and Tableau.",
+    "skills": [
+      "SQL",
+      "Redshift",
+      "Tableau"
+    ],
+    "url": "https://www.amazon.jobs/en/jobs/003",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "microsoft-data-004",
+    "title": "Machine Learning Engineer",
+    "company": "Microsoft",
+    "location": "Remote",
+    "description": "We need ML Engineers skilled in Python, PyTorch, and cloud deployment.",
+    "skills": [
+      "Python",
+      "PyTorch",
+      "Azure"
+    ],
+    "url": "https://careers.microsoft.com/us/en/job/004",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "jpm-data-005",
+    "title": "Data Scientist",
+    "company": "JPMorgan Chase",
+    "location": "Columbus, OH",
+    "description": "Perform analysis and modeling using Python, SQL, and machine learning techniques.",
+    "skills": [
+      "Python",
+      "SQL",
+      "Machine Learning"
+    ],
+    "url": "https://careers.jpmorganchase.com/jobs/005",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "walmart-data-006",
+    "title": "Senior Data Analyst",
+    "company": "Walmart",
+    "location": "Bentonville, AR",
+    "description": "Experienced analyst with skills in Excel, Power BI, and SQL.",
+    "skills": [
+      "Excel",
+      "Power BI",
+      "SQL"
+    ],
+    "url": "https://careers.walmart.com/us/jobs/006",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "netflix-data-007",
+    "title": "Content Data Analyst",
+    "company": "Netflix",
+    "location": "Los Gatos, CA",
+    "description": "Analyze content performance using Python, Tableau, and internal data tools.",
+    "skills": [
+      "Python",
+      "Tableau",
+      "SQL"
+    ],
+    "url": "https://jobs.netflix.com/jobs/007",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "tesla-data-008",
+    "title": "Data Visualization Engineer",
+    "company": "Tesla",
+    "location": "Austin, TX",
+    "description": "Build visual dashboards using D3.js, Python, and internal APIs.",
+    "skills": [
+      "D3.js",
+      "Python",
+      "JavaScript"
+    ],
+    "url": "https://www.tesla.com/careers/job/008",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "apple-data-009",
+    "title": "Product Data Analyst",
+    "company": "Apple",
+    "location": "Cupertino, CA",
+    "description": "Support product decisions with data-driven insights. Tools: SQL, R, Tableau.",
+    "skills": [
+      "SQL",
+      "R",
+      "Tableau"
+    ],
+    "url": "https://jobs.apple.com/en-us/details/009",
+    "posted_date": "2025-07-20"
+  },
+  {
+    "id": "intel-data-010",
+    "title": "Data Engineer Intern",
+    "company": "Intel",
+    "location": "Remote",
+    "description": "Assist with ETL processes and data warehousing using Python and Snowflake.",
+    "skills": [
+      "Python",
+      "ETL",
+      "Snowflake"
+    ],
+    "url": "https://jobs.intel.com/en/job/010",
+    "posted_date": "2025-07-20"
+  }
+]
