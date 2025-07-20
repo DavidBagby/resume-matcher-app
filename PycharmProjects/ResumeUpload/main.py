@@ -5,6 +5,13 @@ import json
 import os
 from datetime import datetime
 
+
+if st.sidebar.button("🧹 Reset usage"):
+    st.cache_data.clear()
+    st.session_state.clear()
+    st.success("Usage limit reset for testing.")
+
+
 # --- Load job feed ---
 base_dir = os.path.dirname(__file__)
 json_path = os.path.join(base_dir, "static_job_feed.json")
