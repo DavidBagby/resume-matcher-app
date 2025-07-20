@@ -12,6 +12,9 @@ if st.sidebar.button("🧹 Reset usage"):
     st.success("Usage limit reset for testing.")
 
 
+st.sidebar.success("✅ Stripe secret loaded.")
+
+
 # --- Load job feed ---
 base_dir = os.path.dirname(__file__)
 json_path = os.path.join(base_dir, "static_job_feed.json")
