@@ -5,6 +5,10 @@ import json
 import os
 from datetime import datetime
 import stripe
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
 
 stripe.api_key = st.secrets["stripe"]["secret_key"]
 
@@ -75,6 +79,46 @@ def has_uploaded_today():
 def mark_upload_today():
     st.session_state["last_upload_date"] = datetime.now().strftime("%Y-%m-%d")
 
+def generate_resume_pdf(resume_skills, matches, suggestions):
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(50, height - 50, "Resume Match Report")
+
+    c.setFont("Helvetica", 12)
+    c.drawString(50, height - 90, "Extracted Skills:")
+    y = height - 110
+    for skill in resume_skills:
+        c.drawString(70, y, f"• {skill}")
+        y -= 15
+
+    y -= 10
+    c.drawString(50, y, "Top Matching Jobs:")
+    y -= 20
+    for job in matches:
+        c.drawString(70, y, f"{job['title']} at {job['company']} ({job['match_score']} matches)")
+        y -= 15
+        if y < 100:
+            c.showPage()
+            y = height - 50
+
+    y -= 10
+    c.drawString(50, y, "Suggestions to Improve Your Resume:")
+    y -= 20
+    for s in suggestions[:5]:  # Limit suggestions in PDF
+        c.drawString(70, y, f"• {s.replace('💡 ', '')}")
+        y -= 15
+        if y < 100:
+            c.showPage()
+            y = height - 50
+
+    c.save()
+    buffer.seek(0)
+    return buffer
+
+
 # --- App Start ---
 st.title("🎯 Resume Matcher for Data Jobs")
 st.subheader("📄 See how your resume matches real data jobs — and get tips to improve it.")
@@ -124,6 +168,15 @@ if uploaded_file:
                             st.markdown("*🔒 Unlock full AI suggestions with Resume Checkup Pro*")
 
                 st.markdown("---")
+                
+        if st.session_state.get("pro_user", False):
+            pdf_buffer = generate_resume_pdf(resume_skills, matches, [s for job in matches for s in job['suggestions']])
+            st.download_button(
+                label="📄 Download Match Report (PDF)",
+                data=pdf_buffer,
+                file_name="resume_match_report.pdf",
+                mime="application/pdf"
+            )
 
         st.markdown("🚀 Want unlimited scans and full resume rewrite tips?")
         if st.button("🔓 Upgrade to Resume Checkup Pro"):

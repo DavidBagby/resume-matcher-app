@@ -3,3 +3,4 @@ python-docx
 pymupdf
 openai
 stripe
+reportlab
