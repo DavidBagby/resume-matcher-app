@@ -54,19 +54,23 @@ def get_top_matches_with_feedback(resume_skills, job_feed, pro_user=False, top_n
 
     return sorted(results, key=lambda x: x["match_score"], reverse=True)[:top_n]
 
-# --- Usage limit tracking (per day per session)
+# --- Persistent usage tracking with st.cache_data ---
+@st.cache_data
+def get_usage_date():
+    return st.session_state.get("last_upload_date", None)
+
 def has_uploaded_today():
     today = datetime.now().strftime("%Y-%m-%d")
-    return st.session_state.get("last_upload_date") == today
+    return get_usage_date() == today
 
 def mark_upload_today():
     st.session_state["last_upload_date"] = datetime.now().strftime("%Y-%m-%d")
 
-# --- App Start
+# --- App Start ---
 st.title("🎯 Resume Matcher for Data Jobs")
 st.subheader("📄 See how your resume matches real data jobs — and get tips to improve it.")
 
-# --- Email capture field (optional for future use)
+# --- Optional email capture ---
 email = st.text_input("📬 Enter your email to receive future resume upgrades (optional):", "")
 
 uploaded_file = st.file_uploader("Upload your resume (PDF or DOCX)", type=["pdf", "docx"])
