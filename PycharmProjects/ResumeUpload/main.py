@@ -4,7 +4,9 @@ from docx import Document
 import json
 import os
 from datetime import datetime
+import stripe
 
+stripe.api_key = st.secrets["stripe"]["secret_key"]
 
 if st.sidebar.button("🧹 Reset usage"):
     st.cache_data.clear()
