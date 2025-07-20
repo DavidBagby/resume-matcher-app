@@ -9,7 +9,6 @@ from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
-
 stripe.api_key = st.secrets["stripe"]["secret_key"]
 
 if st.sidebar.button("🧹 Reset usage"):
@@ -177,18 +176,29 @@ if uploaded_file:
                 mime="application/pdf"
             )
 
-        st.markdown("🚀 Want unlimited scans and full resume rewrite tips?")
-        if st.button("🔓 Upgrade to Resume Checkup Pro"):
-            session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                line_items=[{
-                    "price": st.secrets["stripe"]["price_id"],
-                    "quantity": 1,
-                }],
-                mode="payment",
-                success_url="https://resume-checkup.streamlit.app/?pro=1",
-                cancel_url="https://resume-checkup.streamlit.app/",
-            )
+        if not st.session_state.get("pro_user", False):
+            st.markdown("🚀 Want unlimited scans and full resume rewrite tips?")
+            if st.button("🔓 Upgrade to Resume Checkup Pro"):
+                session = stripe.checkout.Session.create(
+                    payment_method_types=["card"],
+                    line_items=[{
+                        "price": st.secrets["stripe"]["price_id"],
+                        "quantity": 1,
+                    }],
+                    mode="payment",
+                    success_url="https://resume-checkup.streamlit.app/?pro=1",
+                    cancel_url="https://resume-checkup.streamlit.app/",
+                )
+                st.components.v1.html(
+                    f"""
+                    <script>
+                        window.open("{session.url}", "_blank");
+                    </script>
+                    """,
+                    height=0,
+                )
+        else:
+            st.success("✅ You already have Resume Checkup Pro!")
 
             # Open checkout in a new tab
             st.components.v1.html(
