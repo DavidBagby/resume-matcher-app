@@ -177,8 +177,9 @@ if uploaded_file:
             )
 
         if not st.session_state.get("pro_user", False):
-            st.markdown("🚀 Want unlimited scans and full resume rewrite tips?")
-            if st.button("🔓 Upgrade to Resume Checkup Pro"):
+            st.divider()
+            st.subheader("🔓 Want better results?")
+            if st.button("Upgrade to Resume Checkup Pro"):
                 session = stripe.checkout.Session.create(
                     payment_method_types=["card"],
                     line_items=[{
@@ -198,16 +199,6 @@ if uploaded_file:
                     height=0,
                 )
         else:
-            st.success("✅ You already have Resume Checkup Pro!")
-
-            # Open checkout in a new tab
-            st.components.v1.html(
-                f"""
-                <script>
-                    window.open("{session.url}", "_blank");
-                </script>
-                """,
-                height=0,
-            )
+            st.success("✅ Pro access unlocked.")
 
     st.caption("🔍 This tool compares your resume to a sample of current data roles from major employers.")
