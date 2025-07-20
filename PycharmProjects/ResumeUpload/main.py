@@ -305,10 +305,9 @@ if "scan_count" not in st.session_state:
     st.session_state["scan_count"] = 0
 
 if uploaded_file:
-    if not st.session_state.get("pro_user", False) and st.session_state["scan_count"] >= 1:
-        with st.container():
-            st.warning("⚠️ You've reached your free resume scan limit. Upgrade to Pro for unlimited scans.")
-
+    if not st.session_state.get("pro_user", False):
+        if has_uploaded_today():
+            st.warning("⚠️ You’ve already used your free scan today. Upgrade to Pro for unlimited scans.")
             if st.button("💳 Upgrade to Pro"):
                 session = stripe.checkout.Session.create(
                     payment_method_types=["card"],
@@ -328,8 +327,8 @@ if uploaded_file:
                     """,
                     height=0,
                 )
+            st.stop()
 
-        st.stop()
 
     else:
         text = extract_text(uploaded_file)
