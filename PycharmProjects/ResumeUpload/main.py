@@ -4,6 +4,10 @@ from docx import Document
 import json
 import os
 
+# --- OpenAI (optional, for future GPT suggestions) ---
+# import openai
+# openai.api_key = st.secrets.get("OPENAI_API_KEY")
+
 # --- Load job feed ---
 base_dir = os.path.dirname(__file__)
 json_path = os.path.join(base_dir, "static_job_feed.json")
@@ -11,7 +15,10 @@ with open(json_path, "r") as f:
     job_feed = json.load(f)
 
 # --- Skill list (expandable) ---
-SKILLS = ["Python", "SQL", "Tableau", "Power BI", "Excel", "R", "Machine Learning", "Spark", "Redshift", "Azure"]
+SKILLS = [
+    "Python", "SQL", "Tableau", "Power BI", "Excel", "R", "Machine Learning",
+    "Spark", "Redshift", "Azure", "BigQuery", "Snowflake", "D3.js", "JavaScript"
+]
 
 # --- Resume parsing ---
 def extract_text(file):
@@ -26,7 +33,7 @@ def extract_text(file):
 def extract_skills(text):
     return [s for s in SKILLS if s.lower() in text.lower()]
 
-# --- Match and feedback engine ---
+# --- Resume suggestion engine ---
 def suggest_resume_improvements(missing_skills):
     return [
         f"Consider adding a bullet point or project showing experience with **{skill}**."
@@ -53,6 +60,8 @@ def get_top_matches_with_feedback(resume_skills, job_feed, top_n=5):
 
 # --- Streamlit UI ---
 st.title("🎯 Resume Matcher for Data Jobs")
+st.subheader("📄 See how your resume matches real data jobs — and get tips to improve it.")
+
 uploaded_file = st.file_uploader("Upload your resume (PDF or DOCX)", type=["pdf", "docx"])
 
 if uploaded_file:
@@ -64,17 +73,26 @@ if uploaded_file:
 
     matches = get_top_matches_with_feedback(resume_skills, job_feed)
 
+    # Fallback if no matches
+    if all(job["match_score"] == 0 for job in matches):
+        st.warning("Your resume didn’t match any of the top job listings. Try adding more technical skills or uploading a more detailed version.")
+
     st.subheader("🔍 Top Matching Jobs")
     for job in matches:
-        st.markdown(f"""
-        ### {job['title']} at {job['company']}
-        📍 {job['location']}  
-        🔗 [View Job Posting]({job['url']})  
-        ✅ **Match Score:** {job['match_score']}  
-        ❌ **Missing Skills:** {', '.join(job['missing_skills']) if job['missing_skills'] else 'None'}  
-        """)
+        with st.container():
+            st.markdown(f"""
+            ### {job['title']} at {job['company']}
+            📍 {job['location']}  
+            🔗 [View Job Posting]({job['url']})  
+            ✅ **Match Score:** {job['match_score']}  
+            ❌ **Missing Skills:** {', '.join(job['missing_skills']) if job['missing_skills'] else 'None'}  
+            """)
 
-        if job['suggestions']:
-            with st.expander("💡 Suggestions to Improve Your Resume"):
-                for s in job['suggestions']:
-                    st.markdown(f"- {s}")
+            if job['suggestions']:
+                with st.expander("💡 Suggestions to Improve Your Resume"):
+                    for s in job['suggestions'][:2]:
+                        st.markdown(f"- {s}")
+                    if len(job['suggestions']) > 2:
+                        st.markdown("*...more suggestions available with a resume rewrite upgrade*")
+
+            st.markdown("---")
