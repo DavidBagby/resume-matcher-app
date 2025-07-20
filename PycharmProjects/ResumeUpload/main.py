@@ -4,10 +4,6 @@ from docx import Document
 import json
 import os
 
-# --- OpenAI (optional, for future GPT suggestions) ---
-# import openai
-# openai.api_key = st.secrets.get("OPENAI_API_KEY")
-
 # --- Load job feed ---
 base_dir = os.path.dirname(__file__)
 json_path = os.path.join(base_dir, "static_job_feed.json")
@@ -36,7 +32,7 @@ def extract_skills(text):
 # --- Resume suggestion engine ---
 def suggest_resume_improvements(missing_skills):
     return [
-        f"Consider adding a bullet point or project showing experience with **{skill}**."
+        f"💡 _Consider adding a bullet point or project showing experience with **{skill}**._"
         for skill in missing_skills
     ]
 
@@ -68,12 +64,16 @@ if uploaded_file:
     text = extract_text(uploaded_file)
     resume_skills = extract_skills(text)
 
-    st.success("Resume uploaded successfully!")
-    st.write("🧠 **Extracted Skills:**", ", ".join(resume_skills))
+    st.success("✅ Resume uploaded! Checking job matches...")
+
+    st.markdown("🧠 **Extracted Skills:**")
+    if resume_skills:
+        st.code(", ".join(resume_skills), language="text")
+    else:
+        st.warning("No recognized skills found. Try a more detailed resume.")
 
     matches = get_top_matches_with_feedback(resume_skills, job_feed)
 
-    # Fallback if no matches
     if all(job["match_score"] == 0 for job in matches):
         st.warning("Your resume didn’t match any of the top job listings. Try adding more technical skills or uploading a more detailed version.")
 
@@ -91,8 +91,10 @@ if uploaded_file:
             if job['suggestions']:
                 with st.expander("💡 Suggestions to Improve Your Resume"):
                     for s in job['suggestions'][:2]:
-                        st.markdown(f"- {s}")
+                        st.markdown(s)
                     if len(job['suggestions']) > 2:
                         st.markdown("*...more suggestions available with a resume rewrite upgrade*")
 
             st.markdown("---")
+
+    st.caption("🔍 This tool compares your resume to a sample of current data roles from major employers.")
