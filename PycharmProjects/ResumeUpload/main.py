@@ -10,15 +10,14 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import re
 
-
+st.session_state["pro_user"] = True
 
 stripe.api_key = st.secrets["stripe"]["secret_key"]
 
-if st.sidebar.button("🧹 Reset usage"):
+if st.sidebar.button("🪩 Reset usage"):
     st.cache_data.clear()
     st.session_state.clear()
     st.success("Usage limit reset for testing.")
-
 
 # --- Load job feed ---
 base_dir = os.path.dirname(__file__)
@@ -39,7 +38,7 @@ def analyze_bullets(bullets):
         s = ""
         if any(verb in b.lower() for verb in WEAK_VERBS):
             s += "⚠️ Try using a stronger verb.\n"
-        if not re.search(r"\\d", b):
+        if not re.search(r"\d", b):
             s += "📏 Add metrics or results (e.g. 'increased efficiency by 20%').\n"
         if len(b.split()) < 5:
             s += "✏️ Expand with more detail.\n"
@@ -47,7 +46,6 @@ def analyze_bullets(bullets):
             suggestions.append((b, s.strip()))
     return suggestions
 
-# --- Resume parsing ---
 def extract_text(file):
     if file.name.endswith(".pdf"):
         doc = fitz.open(stream=file.read(), filetype="pdf")
@@ -69,23 +67,19 @@ def suggest_resume_improvements(missing_skills):
 def get_top_matches_with_feedback(resume_skills, job_feed, pro_user=False, top_n=5):
     results = []
     resume_set = set(s.lower() for s in resume_skills)
-
     for job in job_feed:
         job_set = set(s.lower() for s in job["skills"])
         matched = resume_set & job_set
         missing = list(job_set - resume_set)
         all_suggestions = suggest_resume_improvements(missing)
-
         results.append({
             **job,
             "match_score": len(matched),
             "missing_skills": missing,
             "suggestions": all_suggestions if pro_user else all_suggestions[:2]
         })
-
     return sorted(results, key=lambda x: x["match_score"], reverse=True)[:top_n]
 
-# --- Persistent usage tracking with st.cache_data ---
 @st.cache_data
 def get_usage_date():
     return st.session_state.get("last_upload_date", None)
@@ -101,7 +95,6 @@ def generate_resume_pdf(resume_skills, matches, suggestions):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
-
     c.setFont("Helvetica-Bold", 16)
     c.drawString(50, height - 50, "Resume Match Report")
 
@@ -113,9 +106,11 @@ def generate_resume_pdf(resume_skills, matches, suggestions):
         y -= 15
 
     y -= 10
-    c.drawString(50, y, "Top Matching Jobs:")
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(50, y, "Top Job Matches:")
     y -= 20
     for job in matches:
+        c.setFont("Helvetica", 12)
         c.drawString(70, y, f"{job['title']} at {job['company']} ({job['match_score']} matches)")
         y -= 15
         if y < 100:
@@ -123,9 +118,11 @@ def generate_resume_pdf(resume_skills, matches, suggestions):
             y = height - 50
 
     y -= 10
+    c.setFont("Helvetica-Bold", 14)
     c.drawString(50, y, "Suggestions to Improve Your Resume:")
     y -= 20
-    for s in suggestions[:5]:  # Limit suggestions in PDF
+    for s in suggestions[:5]:
+        c.setFont("Helvetica", 12)
         c.drawString(70, y, f"• {s.replace('💡 ', '')}")
         y -= 15
         if y < 100:
@@ -138,16 +135,14 @@ def generate_resume_pdf(resume_skills, matches, suggestions):
 
 def extract_bullet_points(text):
     lines = text.splitlines()
-    bullets = [line.strip() for line in lines if re.match(r"^[-•●*]\\s", line.strip()) or line.strip().startswith("•")]
-    return bullets[:15]  # Limit for speed
+    bullets = [line.strip() for line in lines if re.match(r"^[-•●*]\s+", line.strip()) or line.strip().startswith("•")]
+    return bullets[:15]
 
-# --- App Start ---
+# --- App UI ---
 st.title("🎯 Resume Matcher for Data Jobs")
 st.subheader("📄 See how your resume matches real data jobs — and get tips to improve it.")
 
-# --- Optional email capture ---
 email = st.text_input("📬 Enter your email to receive future resume upgrades (optional):", "")
-
 uploaded_file = st.file_uploader("Upload your resume (PDF or DOCX)", type=["pdf", "docx"])
 
 if uploaded_file:
@@ -162,7 +157,9 @@ if uploaded_file:
             if feedback:
                 with st.expander("🧠 Resume Rewrite Suggestions"):
                     for original, tip in feedback:
-                        st.markdown(f"**• {original}**\n\n{tip}\n")
+                        st.markdown(f"🔍 **Original:** {original}")
+                        st.markdown(tip)
+                        st.markdown("---")
             else:
                 st.markdown("✅ Your bullet points look strong!")
         else:
@@ -179,29 +176,26 @@ if uploaded_file:
         else:
             st.warning("No recognized skills found. Try a more detailed resume.")
 
-        matches = get_top_matches_with_feedback(resume_skills, job_feed, pro_user=False)
+        matches = get_top_matches_with_feedback(resume_skills, job_feed, pro_user=st.session_state.get("pro_user", False))
 
         if all(job["match_score"] == 0 for job in matches):
             st.warning("Your resume didn’t match any of the top job listings. Try adding more technical skills or uploading a more detailed version.")
 
         st.subheader("🔍 Top Matching Jobs")
         for job in matches:
+            match_bar = "🟩" * job["match_score"] + "⬜" * (5 - job["match_score"])
             with st.container():
                 st.markdown(f"""
                 ### {job['title']} at {job['company']}
                 📍 {job['location']}  
                 🔗 [View Job Posting]({job['url']})  
-                ✅ **Match Score:** {job['match_score']}  
+                ✅ **Match Score:** {job['match_score']} {match_bar}  
                 ❌ **Missing Skills:** {', '.join(job['missing_skills']) if job['missing_skills'] else 'None'}  
                 """)
-
                 if job['suggestions']:
                     with st.expander("💡 Suggestions to Improve Your Resume"):
                         for s in job['suggestions']:
                             st.markdown(s)
-                        if len(job['suggestions']) >= 2:
-                            st.markdown("*🔒 Unlock full AI suggestions with Resume Checkup Pro*")
-
                 st.markdown("---")
 
         if st.session_state.get("pro_user", False):
@@ -229,7 +223,7 @@ if uploaded_file:
                 st.components.v1.html(
                     f"""
                     <script>
-                        window.open("{session.url}", "_blank");
+                        window.open(\"{session.url}\", \"_blank\");
                     </script>
                     """,
                     height=0,
