@@ -325,19 +325,19 @@ if not st.session_state.get("pro_user", False) and has_uploaded_today():
             """,
             height=0,
         )
-    st.stop()
+        st.stop()
 
-text = extract_text(uploaded_file)
-bullets = extract_bullet_points(text)
-feedback = analyze_bullets(bullets)
+        text = extract_text(uploaded_file)
+        bullets = extract_bullet_points(text)
+        feedback = analyze_bullets(bullets)
 
-resume_skills = extract_skills(text)
-skill_score = len(resume_skills)
-feedback_score = max(0, 15 - len(feedback))
-total_score = min(100, int((skill_score * 3 + feedback_score * 5)))
+        resume_skills = extract_skills(text)
+        skill_score = len(resume_skills)
+        feedback_score = max(0, 15 - len(feedback))
+        total_score = min(100, int((skill_score * 3 + feedback_score * 5)))
 
-st.markdown(f"### 🧪 Resume Strength: {total_score}%")
-st.progress(total_score)
+        st.markdown(f"### 🧪 Resume Strength: {total_score}%")
+        st.progress(total_score)
 
         # Resume score badge
         if total_score >= 85:
