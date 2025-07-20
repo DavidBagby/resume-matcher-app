@@ -305,12 +305,11 @@ if "scan_count" not in st.session_state:
     st.session_state["scan_count"] = 0
 
 if uploaded_file:
-    if not st.session_state.get("pro_user", False):
-        if st.session_state["scan_count"] >= 1:
-            with st.container():
-                st.warning("⚠️ You've reached your free resume scan limit. Upgrade to Pro for unlimited scans.")
-                st.markdown("💳 [Upgrade here](https://buy.stripe.com/your-link)")
-            st.stop()
+    if not st.session_state.get("pro_user", False) and st.session_state["scan_count"] >= 1:
+        with st.container():
+            st.warning("⚠️ You've reached your free resume scan limit. Upgrade to Pro for unlimited scans.")
+            st.markdown("💳 [Upgrade here](https://buy.stripe.com/your-link)")
+        st.stop()
 
     else:
         text = extract_text(uploaded_file)
