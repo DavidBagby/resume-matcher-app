@@ -10,8 +10,6 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import re
 
-st.session_state["pro_user"] = True
-
 stripe.api_key = st.secrets["stripe"]["secret_key"]
 
 if st.sidebar.button("🪩 Reset usage"):
@@ -91,7 +89,13 @@ def has_uploaded_today():
 def mark_upload_today():
     st.session_state["last_upload_date"] = datetime.now().strftime("%Y-%m-%d")
 
-def generate_resume_pdf(resume_skills, matches, suggestions):
+def save_email_capture(email, summary_text):
+    if email:
+        log_path = os.path.join(base_dir, "email_capture_log.txt")
+        with open(log_path, "a") as f:
+            f.write(f"{datetime.now().isoformat()} | {email} | {summary_text[:100]}...\n")
+
+def generate_resume_pdf(resume_skills, matches, suggestions, full_text=None, rewritten_bullets=None):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
@@ -129,6 +133,34 @@ def generate_resume_pdf(resume_skills, matches, suggestions):
             c.showPage()
             y = height - 50
 
+    if full_text:
+        y -= 20
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(50, y, "Full Resume Text:")
+        y -= 20
+        for line in full_text.splitlines():
+            c.setFont("Helvetica", 10)
+            c.drawString(70, y, line[:100])
+            y -= 12
+            if y < 100:
+                c.showPage()
+                y = height - 50
+
+    if rewritten_bullets:
+        y -= 20
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(50, y, "Rewritten Bullet Suggestions:")
+        y -= 20
+        for original, tip in rewritten_bullets:
+            c.setFont("Helvetica", 10)
+            c.drawString(70, y, f"- {original[:80]}")
+            y -= 12
+            c.drawString(90, y, tip[:80])
+            y -= 12
+            if y < 100:
+                c.showPage()
+                y = height - 50
+
     c.save()
     buffer.seek(0)
     return buffer
@@ -150,6 +182,7 @@ if uploaded_file:
         st.warning("⚠️ You’ve already scanned a resume today. Upgrade to Pro for unlimited scans.")
     else:
         text = extract_text(uploaded_file)
+        save_email_capture(email, text)
         bullets = extract_bullet_points(text)
         feedback = analyze_bullets(bullets)
 
@@ -199,7 +232,7 @@ if uploaded_file:
                 st.markdown("---")
 
         if st.session_state.get("pro_user", False):
-            pdf_buffer = generate_resume_pdf(resume_skills, matches, [s for job in matches for s in job['suggestions']])
+            pdf_buffer = generate_resume_pdf(resume_skills, matches, [s for job in matches for s in job['suggestions']], full_text=text, rewritten_bullets=feedback)
             st.download_button(
                 label="📄 Download Match Report (PDF)",
                 data=pdf_buffer,
@@ -223,7 +256,7 @@ if uploaded_file:
                 st.components.v1.html(
                     f"""
                     <script>
-                        window.open(\"{session.url}\", \"_blank\");
+                        window.open("{session.url}", "_blank");
                     </script>
                     """,
                     height=0,
