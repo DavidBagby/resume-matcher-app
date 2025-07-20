@@ -297,34 +297,35 @@ uploaded_file = st.file_uploader("Upload your resume (PDF or DOCX)", type=["pdf"
 #    with open(log_path, "a") as log:
 #        log.write(f"{datetime.now().isoformat()} | {email} | {uploaded_file.name if uploaded_file else 'no file'}\n")
 
+# Initialize session state values early
 if "scan_count" not in st.session_state:
     st.session_state["scan_count"] = 0
+if "last_upload_date" not in st.session_state:
+    st.session_state["last_upload_date"] = ""
 
-if uploaded_file:
-    if not st.session_state.get("pro_user", False):
-        if has_uploaded_today():
-            st.warning("⚠️ You’ve already used your free scan today. Upgrade to Pro for unlimited scans.")
-            if st.button("💳 Upgrade to Pro"):
-                session = stripe.checkout.Session.create(
-                    payment_method_types=["card"],
-                    line_items=[{
-                        "price": st.secrets["stripe"]["price_id"],
-                        "quantity": 1,
-                    }],
-                    mode="payment",
-                    success_url="https://resume-checkup.streamlit.app/?pro=1",
-                    cancel_url="https://resume-checkup.streamlit.app/",
-                )
-                st.components.v1.html(
-                    f"""
-                    <script>
-                        window.open("{session.url}", "_blank");
-                    </script>
-                    """,
-                    height=0,
-                )
-            st.stop()
-
+# Limit free users before file is uploaded
+if not st.session_state.get("pro_user", False) and has_uploaded_today():
+    st.warning("⚠️ You’ve already used your free scan today. Upgrade to Pro for unlimited scans.")
+    if st.button("💳 Upgrade to Pro"):
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price": st.secrets["stripe"]["price_id"],
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url="https://resume-checkup.streamlit.app/?pro=1",
+            cancel_url="https://resume-checkup.streamlit.app/",
+        )
+        st.components.v1.html(
+            f"""
+            <script>
+                window.open("{session.url}", "_blank");
+            </script>
+            """,
+            height=0,
+        )
+    st.stop()
 
     else:
         text = extract_text(uploaded_file)
