@@ -8,6 +8,9 @@ import stripe
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import re
+
+
 
 stripe.api_key = st.secrets["stripe"]["secret_key"]
 
@@ -27,6 +30,22 @@ SKILLS = [
     "Python", "SQL", "Tableau", "Power BI", "Excel", "R", "Machine Learning",
     "Spark", "Redshift", "Azure", "BigQuery", "Snowflake", "D3.js", "JavaScript"
 ]
+WEAK_VERBS = ["helped", "worked on", "assisted", "involved in", "supported", "participated"]
+STRONG_VERBS = ["developed", "led", "analyzed", "designed", "optimized", "implemented", "engineered"]
+
+def analyze_bullets(bullets):
+    suggestions = []
+    for b in bullets:
+        s = ""
+        if any(verb in b.lower() for verb in WEAK_VERBS):
+            s += "⚠️ Try using a stronger verb.\n"
+        if not re.search(r"\\d", b):
+            s += "📏 Add metrics or results (e.g. 'increased efficiency by 20%').\n"
+        if len(b.split()) < 5:
+            s += "✏️ Expand with more detail.\n"
+        if s:
+            suggestions.append((b, s.strip()))
+    return suggestions
 
 # --- Resume parsing ---
 def extract_text(file):
@@ -117,6 +136,11 @@ def generate_resume_pdf(resume_skills, matches, suggestions):
     buffer.seek(0)
     return buffer
 
+def extract_bullet_points(text):
+    lines = text.splitlines()
+    bullets = [line.strip() for line in lines if re.match(r"^[-•●*]\\s", line.strip()) or line.strip().startswith("•")]
+    return bullets[:15]  # Limit for speed
+
 # --- App Start ---
 st.title("🎯 Resume Matcher for Data Jobs")
 st.subheader("📄 See how your resume matches real data jobs — and get tips to improve it.")
@@ -131,6 +155,19 @@ if uploaded_file:
         st.warning("⚠️ You’ve already scanned a resume today. Upgrade to Pro for unlimited scans.")
     else:
         text = extract_text(uploaded_file)
+        bullets = extract_bullet_points(text)
+        feedback = analyze_bullets(bullets)
+
+        if st.session_state.get("pro_user", False):
+            if feedback:
+                with st.expander("🧠 Resume Rewrite Suggestions"):
+                    for original, tip in feedback:
+                        st.markdown(f"**• {original}**\n\n{tip}\n")
+            else:
+                st.markdown("✅ Your bullet points look strong!")
+        else:
+            st.markdown("🔒 Upgrade to Pro to see smart resume rewrite tips.")
+
         resume_skills = extract_skills(text)
 
         st.success("✅ Resume uploaded! Checking job matches...")
@@ -178,8 +215,7 @@ if uploaded_file:
 
         if not st.session_state.get("pro_user", False):
             st.divider()
-            st.subheader("🔓 Want better results?")
-            if st.button("Upgrade to Resume Checkup Pro"):
+            if st.button("🔓 Want better results? Upgrade to Pro"):
                 session = stripe.checkout.Session.create(
                     payment_method_types=["card"],
                     line_items=[{
