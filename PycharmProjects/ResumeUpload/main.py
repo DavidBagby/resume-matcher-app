@@ -519,7 +519,7 @@ if uploaded_file:
                     """,
                     height=0,
                 )
-        else:
-            st.success("✅ Pro access unlocked.")
+else:
+    st.success("✅ Pro access unlocked.")
 
     st.caption("🔍 This tool compares your resume to a sample of current data roles from major employers.")
