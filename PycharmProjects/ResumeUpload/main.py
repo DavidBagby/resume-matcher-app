@@ -308,7 +308,27 @@ if uploaded_file:
     if not st.session_state.get("pro_user", False) and st.session_state["scan_count"] >= 1:
         with st.container():
             st.warning("⚠️ You've reached your free resume scan limit. Upgrade to Pro for unlimited scans.")
-            st.markdown("💳 [Upgrade here](https://buy.stripe.com/your-link)")
+
+            if st.button("💳 Upgrade to Pro"):
+                session = stripe.checkout.Session.create(
+                    payment_method_types=["card"],
+                    line_items=[{
+                        "price": st.secrets["stripe"]["price_id"],
+                        "quantity": 1,
+                    }],
+                    mode="payment",
+                    success_url="https://resume-checkup.streamlit.app/?pro=1",
+                    cancel_url="https://resume-checkup.streamlit.app/",
+                )
+                st.components.v1.html(
+                    f"""
+                    <script>
+                        window.open("{session.url}", "_blank");
+                    </script>
+                    """,
+                    height=0,
+                )
+
         st.stop()
 
     else:
