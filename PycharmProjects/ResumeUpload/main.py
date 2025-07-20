@@ -11,6 +11,9 @@ if st.sidebar.button("🧹 Reset usage"):
     st.session_state.clear()
     st.success("Usage limit reset for testing.")
 
+st.sidebar.write("🔐 Stripe key:", st.secrets["stripe"]["secret_key"][:10] + "...")
+st.sidebar.write("💵 Price ID:", st.secrets["stripe"]["price_id"])
+
 
 # --- Load job feed ---
 base_dir = os.path.dirname(__file__)
