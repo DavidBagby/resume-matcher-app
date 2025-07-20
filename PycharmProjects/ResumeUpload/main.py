@@ -12,9 +12,6 @@ if st.sidebar.button("🧹 Reset usage"):
     st.success("Usage limit reset for testing.")
 
 
-st.sidebar.success("✅ Stripe secret loaded.")
-
-
 # --- Load job feed ---
 base_dir = os.path.dirname(__file__)
 json_path = os.path.join(base_dir, "static_job_feed.json")
@@ -127,6 +124,17 @@ if uploaded_file:
                 st.markdown("---")
 
         st.markdown("🚀 Want unlimited scans and full resume rewrite tips?")
-        st.button("🔓 Upgrade to Resume Checkup Pro", disabled=True)
+        if st.button("🔓 Upgrade to Resume Checkup Pro"):
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[{
+                    "price": st.secrets["stripe"]["price_id"],
+                    "quantity": 1,
+                }],
+                mode="payment",
+                success_url="https://resume-checkup.streamlit.app/?pro=1",
+                cancel_url="https://resume-checkup.streamlit.app/",
+            )
+            st.markdown(f"[👉 Click here to complete payment]({session.url})", unsafe_allow_html=True)
 
     st.caption("🔍 This tool compares your resume to a sample of current data roles from major employers.")
