@@ -145,13 +145,9 @@ def get_top_matches_with_feedback(resume_skills, job_feed, pro_user=False, top_n
         })
     return sorted(results, key=lambda x: x["match_score"], reverse=True)[:top_n]
 
-@st.cache_data
-def get_usage_date():
-    return st.session_state.get("last_upload_date", None)
-
 def has_uploaded_today():
     today = datetime.now().strftime("%Y-%m-%d")
-    return get_usage_date() == today
+    return st.session_state.get("last_upload_date") == today
 
 def mark_upload_today():
     st.session_state["last_upload_date"] = datetime.now().strftime("%Y-%m-%d")
