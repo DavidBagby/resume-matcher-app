@@ -20,6 +20,9 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
 stripe.api_key = st.secrets["stripe"]["secret_key"]
+# Check for Pro query param in URL
+if "pro" in st.query_params:
+    st.session_state["pro_user"] = True
 
 # --- Load job feed ---
 base_dir = os.path.dirname(__file__)
