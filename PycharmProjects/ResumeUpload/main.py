@@ -301,9 +301,17 @@ uploaded_file = st.file_uploader("Upload your resume (PDF or DOCX)", type=["pdf"
 #    with open(log_path, "a") as log:
 #        log.write(f"{datetime.now().isoformat()} | {email} | {uploaded_file.name if uploaded_file else 'no file'}\n")
 
+if "scan_count" not in st.session_state:
+    st.session_state["scan_count"] = 0
+
+
 if uploaded_file:
-    if has_uploaded_today():
-        st.warning("⚠️ You’ve already scanned a resume today. Upgrade to Pro for unlimited scans.")
+    # ✅ Check usage limits for free users
+    if not st.session_state.get("pro_user", False):
+        if st.session_state["scan_count"] >= 1:  # ← allow 1 scan for free
+            st.warning("⚠️ You've reached your free resume scan limit. Upgrade to Pro for unlimited scans.")
+            st.stop()
+
     else:
         text = extract_text(uploaded_file)
         bullets = extract_bullet_points(text)
@@ -376,6 +384,7 @@ if uploaded_file:
 
         st.success("✅ Resume uploaded! Checking job matches...")
         mark_upload_today()
+        st.session_state["scan_count"] += 1
 
         if st.session_state.get("pro_user", False):
             st.subheader("✍️ Resume Rewrite Mode")
