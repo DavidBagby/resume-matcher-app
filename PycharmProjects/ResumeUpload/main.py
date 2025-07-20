@@ -137,6 +137,15 @@ if uploaded_file:
                 success_url="https://resume-checkup.streamlit.app/?pro=1",
                 cancel_url="https://resume-checkup.streamlit.app/",
             )
-            st.markdown(f"[👉 Click here to complete payment]({session.url})", unsafe_allow_html=True)
+
+            # Open checkout in a new tab
+            st.components.v1.html(
+                f"""
+                <script>
+                    window.open("{session.url}", "_blank");
+                </script>
+                """,
+                height=0,
+            )
 
     st.caption("🔍 This tool compares your resume to a sample of current data roles from major employers.")
