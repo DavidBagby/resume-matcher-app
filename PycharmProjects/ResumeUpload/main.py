@@ -325,8 +325,9 @@ if not st.session_state.get("pro_user", False) and has_uploaded_today():
             """,
             height=0,
         )
-        st.stop()
+    st.stop()
 
+if uploaded_file:
         text = extract_text(uploaded_file)
         bullets = extract_bullet_points(text)
         feedback = analyze_bullets(bullets)
