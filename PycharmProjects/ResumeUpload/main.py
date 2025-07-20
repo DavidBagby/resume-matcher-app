@@ -309,8 +309,12 @@ if uploaded_file:
     # ✅ Check usage limits for free users
     if not st.session_state.get("pro_user", False):
         if st.session_state["scan_count"] >= 1:  # ← allow 1 scan for free
-            st.warning("⚠️ You've reached your free resume scan limit. Upgrade to Pro for unlimited scans.")
-            st.stop()
+            with st.container():
+                st.warning("⚠️ You've reached your free resume scan limit. Upgrade to Pro for unlimited scans.")
+                st.markdown("💳 [Click here to upgrade](https://buy.stripe.com/YOUR_LINK_HERE)")
+
+                st.markdown("You can also reset your scan count in the sidebar for testing.")
+                st.stop()
 
     else:
         text = extract_text(uploaded_file)
