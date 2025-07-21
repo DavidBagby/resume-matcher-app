@@ -514,15 +514,13 @@ if uploaded_file:
                     success_url="https://resume-checkup.streamlit.app/?pro=1",
                     cancel_url="https://resume-checkup.streamlit.app/",
                 )
-                st.markdown(
+                st.components.v1.html(
                     f"""
-                    <a href="{session.url}" target="_blank">
-                        <button style="padding:0.5rem 1rem; background-color:#ff4b4b; color:white; border:none; border-radius:5px; font-size:16px; cursor:pointer;">
-                            💳 Go to Checkout
-                        </button>
-                    </a>
-                    """,
-                    unsafe_allow_html=True
+                            <script>
+                                window.open("{session.url}", "_blank");
+                            </script>
+                            """,
+                    height=0,
                 )
 else:
     if "pro" in st.query_params:
