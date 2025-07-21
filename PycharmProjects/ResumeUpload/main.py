@@ -503,25 +503,39 @@ if uploaded_file:
 
         if not st.session_state.get("pro_user", False):
             st.divider()
-            if st.button("🔓 Want better results? Upgrade to Pro"):
-                session = stripe.checkout.Session.create(
-                    payment_method_types=["card"],
-                    line_items=[{
-                        "price": st.secrets["stripe"]["price_id"],
-                        "quantity": 1,
-                    }],
-                    mode="payment",
-                    success_url="https://resume-checkup.streamlit.app/?pro=1",
-                    cancel_url="https://resume-checkup.streamlit.app/",
-                )
-                st.components.v1.html(
-                    f"""
-                            <script>
-                                window.open("{session.url}", "_blank");
-                            </script>
-                            """,
-                    height=0,
-                )
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[{
+                    "price": st.secrets["stripe"]["price_id"],
+                    "quantity": 1,
+                }],
+                mode="payment",
+                success_url="https://resume-checkup.streamlit.app/?pro=1",
+                cancel_url="https://resume-checkup.streamlit.app/",
+            )
+
+            st.markdown(
+                f"""
+                <a href="{session.url}" target="_blank">
+                    <button style="
+                        background-color: transparent;
+                        color: white;
+                        padding: 12px 24px;
+                        border: 2px solid #ffffff33;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.backgroundColor='#ffffff22'" onmouseout="this.style.backgroundColor='transparent'">
+                        🔓 Want better results? Upgrade to Pro
+                    </button>
+                </a>
+                """,
+                unsafe_allow_html=True
+            )
+
+
 else:
     if "pro" in st.query_params:
         st.success("✅ Pro access unlocked. You now have unlimited scans.")
