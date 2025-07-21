@@ -523,6 +523,7 @@ if uploaded_file:
                     height=0,
                 )
 else:
-    st.success("✅ Pro access unlocked.")
+    if "pro" in st.query_params:
+        st.success("✅ Pro access unlocked. You now have unlimited scans.")
 
     st.caption("🔍 This tool compares your resume to a sample of current data roles from major employers.")
